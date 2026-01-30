@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triple Lock - Checkpoint 2</title>
+    <script></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #2d1b4e 0%, #1a0f2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: rgba(45, 27, 78, 0.9);
+            border: 2px solid #7c3aed;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #a78bfa;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(167, 139, 250, 0.5);
+        }
+
+        .level-indicator {
+            background: #3b2667;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #a78bfa;
+        }
+
+        .clues {
+            background: #2d1b4e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #7c3aed;
+        }
+
+        .clue-item {
+            display: flex;
+            margin-bottom: 12px;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .clue-digits {
+            display: flex;
+            gap: 5px;
+            margin-right: 15px;
+        }
+
+        .digit-box {
+            background: #3b2667;
+            color: #a78bfa;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            min-width: 35px;
+            text-align: center;
+        }
+
+        .clue-hint {
+            color: #fbbf24;
+            font-size: 12px;
+        }
+
+        .input-section {
+            margin: 20px 0;
+        }
+
+        .input-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .code-input {
+            width: 50px;
+            height: 60px;
+            font-size: 28px;
+            text-align: center;
+            background: #3b2667;
+            border: 2px solid #a78bfa;
+            border-radius: 8px;
+            color: #a78bfa;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .code-input:focus {
+            outline: none;
+            border-color: #fbbf24;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #a78bfa, #7c3aed);
+            border: none;
+            border-radius: 8px;
+            color: #1a0f2e;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(167, 139, 250, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none;
+        }
+
+        .message.error {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff6b6b;
+        }
+
+        .message.success {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #51ff51;
+        }
+
+        .success-message {
+            background: #3b2667;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #10b981;
+            display: none;
+        }
+
+        .success-message h3 {
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+
+        .success-message p {
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .qr-container {
+            display: none;
+            text-align: center;
+        }
+
+        .qr-container h2 {
+            color: #10b981;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+
+        .loading {
+            text-align: center;
+            display: none;
+        }
+
+        .loading-spinner {
+            border: 4px solid #3b2667;
+            border-top: 4px solid #a78bfa;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            .code-input {
+                width: 45px;
+                height: 55px;
+                font-size: 24px;
+            }
+
+            .digit-box {
+                padding: 6px 10px;
+                min-width: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 ADVANCED LOCK SYSTEM</h1>
+            <p>Checkpoint TIM SUN QUAN</p>
+        </div>
+
+        <div id="gameArea">
+            <div class="level-indicator">
+                <span id="levelText">LEVEL 1 - BRANKAS UTAMA</span>
+            </div>
+
+            <div class="clues" id="cluesArea">
+                <!-- Clues will be inserted here -->
+            </div>
+
+            <div class="success-message" id="successMessage"></div>
+
+            <div class="input-section" id="inputSection">
+                <div class="input-wrapper" id="inputWrapper">
+                    <!-- Input boxes will be generated here -->
+                </div>
+                <button class="submit-btn" id="submitBtn">VERIFIKASI KODE</button>
+                <div class="message" id="message"></div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>Membuka Brankas...</p>
+        </div>
+
+        <div class="qr-container" id="finalMessage" style="display:none;">
+            <h2>🎉 SELAMAT! BRANKAS TERBUKA! 🎉</h2>
+        
+            <div class="success-message" style="display:block;">
+                <p><strong>KATA KUNCI:</strong> <span id="finalKey"></span></p>
+                <br>
+                <p><strong>Clue Lokasi Berikutnya:</strong></p>
+                <p><em id="finalClue"></em></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const levels = {
+           1: {
+  title: "LEVEL 1 - BRANKAS UTAMA",
+  clues: [
+    { digits: [1, 7, 8], hint: "Satu digit benar dan posisinya tepat." },
+    { digits: [9, 2, 1], hint: "Dua digit benar, tapi tidak ada yang berada pada posisi tepat." },
+    { digits: [2, 3, 5], hint: "Satu digit benar, tapi tidak berada pada posisi tepat." }
+  ],
+  answer: "193",
+  successMessage: "AKSES TAHAP 2 DIBERIKAN."
+}
+,
+            2: {
+  title: "LEVEL 2 - BRANKAS VERIFIKASI",
+  clues: [
+    { digits: [6, 1, 3], hint: "Satu digit benar dan posisinya tepat." },
+    { digits: [7, 0, 4], hint: "Dua digit benar, keduanya berada di posisi yang salah." },
+    { digits: [2, 5, 9], hint: "Tidak ada digit digunakan sistem." },
+    { digits: [0, 7, 8], hint: "Satu digit benar, namun salah posisi." }
+  ],
+  answer: "640",
+  successMessage: "VERIFIKASI BERHASIL."
+}
+,
+            3: {
+  title: "LEVEL 3 - GEMBOK TERLUAR",
+  clues: [
+    { digits: [4, 7, 9, 0], hint: "Satu digit benar dan posisinya tepat." },
+    { digits: [8, 1, 3, 6], hint: "Dua digit benar, tetapi keduanya berada di posisi salah." },
+    { digits: [2, 4, 8, 5], hint: "Tiga digit benar. tidak ada pada posisi tepat." },
+    { digits: [7, 0, 6, 9], hint: "Tidak ada digit digunakan sistem." },
+    { digits: [5, 8, 3, 6], hint: "Satu digit benar dan posisinya tepat." }
+  ],
+  answer: "4821",
+  successMessage: "AKSES TAHAP 4 DIBERIKAN. Gunakan kode ini untuk membuka Gerbang Isolasi."
+},
+4: {
+  title: "LEVEL 4 - GERBANG ISOLASI",
+  clues: [
+    { digits: [2, 6, 3, 1], hint: "Satu digit benar dan posisinya tepat." },
+
+    { digits: [6, 1, 4, 0], hint: "Dua digit benar, tetapi keduanya berada di posisi yang salah." },
+
+    { digits: [0, 7, 2, 9], hint: "Satu digit benar tapi posisinya salah." },
+
+    { digits: [2, 0, 5, 4], hint: "Dua digit benar. Satu berada di posisi tepat, satunya berada di posisi salah." },
+
+    { digits: [7, 3, 1, 4], hint: "Dua digit benar. tetapi keduanya berada di posisi yang salah." },
+
+    { digits: [3, 8, 6, 5], hint: "Satu digit benar. Tapi posisinya salah." }
+  ],
+  answer: "9451",
+  successMessage: "VERIFIKASI BERHASIL. Kode ini diperlukan untuk membuka Kunci Utama."
+}
+,
+            5: {
+  title: "LEVEL 5 - KUNCI UTAMA",
+  clues: [
+    { digits: [9, 3, 0, 5, 2], hint: "Satu digit disini benar dan di posisi tepat." },
+
+    { digits: [8, 0, 7, 5, 1], hint: "Dua digit benar, Satu di posisi benar, satunya berada di posisi yang salah." },
+
+    { digits: [5, 7, 2, 9, 3], hint: "Dua digit benar, tetapi berada di posisi salah." },
+
+    { digits: [4, 3, 0, 8, 9], hint: "Satu digit benar, berada di posisi tepat." },
+
+    { digits: [3, 8, 9, 5, 6], hint: "Satu digit benar, tapi berada di posisi salah." },
+
+    { digits: [4, 3, 0, 9, 6], hint: "Dua digit benar, Satu di posisi benar, satunya berada di posisi yang salah." }
+  ],
+  answer: "41762",
+  successMessage: "VERIFIKASI BERHASIL!"
+}
+
+
+
+        };
+
+        let currentLevel = 1;
+
+        function renderLevel(level) {
+            const data = levels[level];
+            document.getElementById('levelText').textContent = data.title;
+
+            // Render clues
+            const cluesHTML = data.clues.map(clue => `
+                <div class="clue-item">
+                    <div class="clue-digits">
+                        ${clue.digits.map(d => `<div class="digit-box">${d}</div>`).join('')}
+                    </div>
+                    <div class="clue-hint">${clue.hint}</div>
+                </div>
+            `).join('');
+            document.getElementById('cluesArea').innerHTML = cluesHTML;
+
+            // Render input boxes
+            const inputCount = data.answer.length;
+            const inputHTML = Array(inputCount).fill(0).map((_, i) => 
+                `<input type="text" class="code-input" maxlength="1" data-index="${i}">`
+            ).join('');
+            document.getElementById('inputWrapper').innerHTML = inputHTML;
+
+            // Add input event listeners
+            const inputs = document.querySelectorAll('.code-input');
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                    if (e.target.value && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                });
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.value && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+
+            inputs[0].focus();
+        }
+
+        function showMessage(text, type) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.className = `message ${type}`;
+            msg.style.display = 'block';
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 3000);
+        }
+
+        function showSuccessMessage(text) {
+            const successMsg = document.getElementById('successMessage');
+            successMsg.innerHTML = `<h3>✓ BERHASIL!</h3><p>${text}</p>`;
+            successMsg.style.display = 'block';
+            
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+                if (currentLevel < 5) {
+                    currentLevel++;
+                    renderLevel(currentLevel);
+                } else {
+                    showFinalMessage();
+                }
+            }, 4000);
+        }
+
+        function verifyCode() {
+            const inputs = document.querySelectorAll('.code-input');
+            const userAnswer = Array.from(inputs).map(input => input.value).join('');
+            const correctAnswer = levels[currentLevel].answer;
+
+            if (userAnswer.length !== correctAnswer.length) {
+                showMessage('Lengkapi semua digit!', 'error');
+                return;
+            }
+
+            if (userAnswer === correctAnswer) {
+                if (currentLevel === 5) {
+                    showSuccessMessage('SEMUA LEVEL SELESAI! Membuka brankas terakhir...');
+                } else {
+                    showSuccessMessage(levels[currentLevel].successMessage);
+                }
+            } else {
+                const inputWrapper = document.getElementById('inputWrapper');
+                inputWrapper.classList.add('shake');
+                showMessage('Akses Ditolak. Coba lagi!', 'error');
+                setTimeout(() => {
+                    inputWrapper.classList.remove('shake');
+                }, 500);
+                inputs.forEach(input => input.value = '');
+                inputs[0].focus();
+            }
+        }
+
+        function showFinalMessage() {
+            const gameArea = document.getElementById('gameArea');
+            const loading = document.getElementById('loading');
+            const finalMessage = document.getElementById('finalMessage');
+
+            gameArea.style.display = 'none';
+            loading.style.display = 'block';
+
+            setTimeout(() => {
+               loading.style.display = 'none';
+                finalMessage.style.display = 'block';
+
+                document.getElementById('finalKey').textContent = "Zhen";
+                document.getElementById('finalClue').textContent = "Turuni beberapa anak tangga batu, kau akan menemukan sebuah area terbuka di bawah kanopi biru. Tiga keran perak berjajar rapi di atas wastafel putih, siap membersihkan tangan yang kotor. Sebuah tong biru besar dan benda ****** berwarna keemasan menjadi penjaganya. Aku tidak hanyut bersama air, tapi bersembunyi di dekat salah satu penjaga setia tempat bersuci ini.";
+            }, 2000);
+}
+        document.getElementById('submitBtn').addEventListener('click', verifyCode);
+
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                verifyCode();
+            }
+        });
+
+        renderLevel(1);
+    </script>
+</body>
+</html>
